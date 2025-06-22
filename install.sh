@@ -3,6 +3,31 @@
 set -e
 set -o pipefail
 
+x_install_debian_packages() {
+    PACKAGES_TO_CHECK=(
+        "tmux"
+        "htop"
+        "curl"
+        "git"
+    )
+    PACKAGES_TO_INSTALL=()
+
+    for PACKAGE in "${PACKAGES_TO_CHECK[@]}"; do
+        if ! dpkg -s "$PACKAGE" &> /dev/null; then
+            echo "Installing $PACKAGE..."
+            PACKAGES_TO_INSTALL+=("$PACKAGE")
+        else
+            echo "$PACKAGE already installed. Skipping..."
+        fi
+    done
+
+    if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    sudo apt-get install -y "${PACKAGES_TO_INSTALL[@]}"
+}
+
 x_set_debian_user_home_dir() {
     if [[ -n "$SUDO_USER" ]]; then
         # Running via sudo, get home directory of the original user
@@ -81,31 +106,6 @@ x_install_neovim() {
     echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $USER_HOME_DIR/$RC_FILE_NAME
 
     echo "Added nvim to \$PATH in ${USER_HOME_DIR}/$RC_FILE_NAME"
-}
-
-x_install_debian_packages() {
-    PACKAGES_TO_CHECK=(
-        "tmux"
-        "htop"
-        "curl"
-        "git"
-    )
-    PACKAGES_TO_INSTALL=()
-
-    for PACKAGE in "${PACKAGES_TO_CHECK[@]}"; do
-        if ! dpkg -s "$PACKAGE" &> /dev/null; then
-            echo "Installing $PACKAGE..."
-            PACKAGES_TO_INSTALL+=("$PACKAGE")
-        else
-            echo "$PACKAGE already installed. Skipping..."
-        fi
-    done
-
-    if [ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]; then
-        return 0
-    fi
-
-    sudo apt-get install -y "${PACKAGES_TO_INSTALL[@]}"
 }
 
 x_setup_gpg_agent_config() {
