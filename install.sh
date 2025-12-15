@@ -10,6 +10,7 @@ x_install_debian_packages() {
         "curl"
         "git"
         "gnupg"
+        "pass"
     )
     PACKAGES_TO_INSTALL=()
 
