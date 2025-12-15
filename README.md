@@ -14,11 +14,13 @@ The following are installed:
 - [tmux](https://github.com/tmux/tmux/wiki)
 - [htop](https://github.com/htop-dev/htop)
 - [git](https://git-scm.com/)
+- [gnupg](https://www.gnupg.org/index.html)
+- [pass](https://www.passwordstore.org/)
 - [Neovim](https://neovim.io/)
 
 ## Quick Setup
 
 ```bash
-curl -s https://raw.githubusercontent.com/czeide/machine-setup/main/install.sh | bash
+curl -s https://raw.githubusercontent.com/czeide/machine-setup/main/install.sh | sudo bash
 ```
 
