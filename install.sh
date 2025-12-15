@@ -11,6 +11,7 @@ x_install_debian_packages() {
         "git"
         "gnupg"
         "pass"
+        "jq"
     )
     PACKAGES_TO_INSTALL=()
 
@@ -94,6 +95,15 @@ x_install_neovim() {
     echo "Installing nvim..."
 
     curl -o /opt/$nvim_os-$nvim_arch.tar.gz -L https://github.com/neovim/neovim/releases/latest/download/$nvim_os-$nvim_arch.tar.gz
+    EXPECTED_HASH=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | jq -r '.assets[] | select(.name == "'$nvim_os'-'$nvim_arch'.tar.gz") | .digest | split(":")[1]')
+    ACTUAL_HASH=$(sha256sum /opt/$nvim_os-$nvim_arch.tar.gz | cut -d ' ' -f 1)
+
+    if [[ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]]; then
+        echo "Checksum verification failed for NeoVim! Aborting..."
+        rm /opt/$nvim_os-$nvim_arch.tar.gz
+        exit 1
+    fi
+    
     tar -C /opt -xzf /opt/$nvim_os-$nvim_arch.tar.gz
     rm /opt/$nvim_os-$nvim_arch.tar.gz
 
@@ -188,7 +198,7 @@ x_download_and_import_public_gpg() {
     if [[ -f "$gpg_pub_checksum_path" ]]; then
         echo "Verifying checksum..."
         if ! (sha256sum --check --status "$gpg_pub_checksum_path"); then
-            echo "Checksum verification failed! Aborting..."
+            echo "Checksum verification failed for Public GPG key! Aborting..."
             rm "$gpg_pub_file_path" "$gpg_pub_checksum_path"
             exit 1
         fi
