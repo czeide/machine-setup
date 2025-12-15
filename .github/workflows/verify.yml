@@ -1,6 +1,14 @@
 name: Verify Checksum
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "install.sh"
+      - "public.pgp"
+  pull_request:
+    paths:
+      - "install.sh"
+      - "public.pgp"
 
 jobs:
   verify-checksum:
