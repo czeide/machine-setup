@@ -1,0 +1,33 @@
+name: Verify Checksum
+
+on: [push, pull_request]
+
+jobs:
+  verify-checksum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify install.sh checksum
+        run: |
+          sha256sum install.sh > install.sh.sha256.expected
+
+          if ! diff -q install.sh.sha256 install.sh.sha256.expected; then
+            echo "Error: Checksum of install.sh does not match!"
+            echo "Please run: sha256sum install.sh > install.sh.sha256"
+            exit 1
+          fi
+
+          echo "Install script checksum is valid."
+
+      - name: Verify public.pgp checksum
+        run: |
+          sha256sum public.pgp > public.pgp.sha256.expected
+
+          if ! diff -q public.pgp.sha256 public.pgp.sha256.expected; then
+            echo "Error: Checksum of public.pgp does not match!"
+            echo "Please run: sha256sum public.pgp > public.pgp.sha256"
+            exit 1
+          fi
+
+          echo "Public GPG key checksum is valid."
