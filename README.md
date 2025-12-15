@@ -21,6 +21,12 @@ The following are installed:
 ## Quick Setup
 
 ```bash
-curl -s https://raw.githubusercontent.com/czeide/machine-setup/main/install.sh | sudo bash
+curl -s https://raw.githubusercontent.com/czeide/machine-setup/main/install.sh -o /tmp/install.sh && \
+curl -s https://raw.githubusercontent.com/czeide/machine-setup/main/install.sh.sha256 -o /tmp/install.sh.sha256 && \
+if [ "$(cat /tmp/install.sh.sha256 | cut -d ' ' -f 1)" != "$(sha256sum /tmp/install.sh | cut -d ' ' -f 1)" ]; then \
+    echo "Script checksums do not match! Aborting..." && \
+    exit 1; \
+fi && \
+sudo bash /tmp/install.sh
 ```
 
