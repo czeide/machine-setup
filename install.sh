@@ -156,6 +156,12 @@ EOF
     fi
 }
 
+if [[ -z "$SUDO_USER" ]]; then
+    echo "Script must be run with sudo..."
+    echo "Usage: sudo ./install.sh"
+    exit 1
+fi
+
 if [[ "$(uname -s)" == "Darwin" ]]; then
     echo "Script not yet implemented for MacOS..."
     exit 1
