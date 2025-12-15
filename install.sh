@@ -162,6 +162,33 @@ EOF
     fi
 }
 
+x_download_and_import_public_gpg() {
+    local gpg_email="czeideavanzado@gmail.com"
+
+    if sudo -u "$SUDO_USER" gpg --list-keys "$gpg_email" &> /dev/null; then
+        echo "GPG key for $gpg_email already imported. Skipping..."
+        return 0
+    fi
+
+    local gpg_pub_filename="public.pgp"
+    local gpg_pub_file_path="/tmp/$gpg_pub_filename"
+
+    curl -o "$gpg_pub_file_path" -L https://raw.githubusercontent.com/czeide/machine-setup/main/$gpg_pub_filename
+
+    if [[ ! -f "$gpg_pub_file_path" ]]; then
+        echo "$gpg_pub_file_path not found. Skipping..."
+        return 0
+    fi
+
+    echo "Importing $gpg_pub_file_path..."
+
+    sudo -u "$SUDO_USER" gpg --import "$gpg_pub_file_path"
+    FINGERPRINT=$(sudo -u "$SUDO_USER" gpg --with-colons --show-keys "$gpg_pub_file_path" | awk -F: '/^fpr:/ { print $10; exit }')
+    echo "$FINGERPRINT:6:" | sudo -u "$SUDO_USER" gpg --import-ownertrust
+
+    rm "$gpg_pub_file_path"
+}
+
 if [[ -z "$SUDO_USER" ]]; then
     echo "Script must be run with sudo..."
     echo "Usage: sudo ./install.sh"
@@ -182,3 +209,4 @@ fi
 x_install_neovim
 x_setup_gitconfig
 x_setup_gpg_agent_config
+x_download_and_import_public_gpg
