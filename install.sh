@@ -175,9 +175,28 @@ x_download_and_import_public_gpg() {
 
     curl -o "$gpg_pub_file_path" -L https://raw.githubusercontent.com/czeide/machine-setup/main/$gpg_pub_filename
 
+    local gpg_pub_checksum_filename="public.pgp.sha256"
+    local gpg_pub_checksum_path="/tmp/$gpg_pub_checksum_filename"
+
+    curl -o "$gpg_pub_checksum_path" -L https://raw.githubusercontent.com/czeide/machine-setup/main/$gpg_pub_checksum_filename
+
     if [[ ! -f "$gpg_pub_file_path" ]]; then
         echo "$gpg_pub_file_path not found. Skipping..."
         return 0
+    fi
+
+    if [[ -f "$gpg_pub_checksum_path" ]]; then
+        echo "Verifying checksum..."
+        if ! (sha256sum --check --status "$gpg_pub_checksum_path"); then
+            echo "Checksum verification failed! Aborting..."
+            rm "$gpg_pub_file_path" "$gpg_pub_checksum_path"
+            exit 1
+        fi
+        echo "Checksum verified successfully."
+        rm "$gpg_pub_checksum_path"
+    else
+        echo "Checksum file for public GPG key not found! Aborting..."
+        exit 1
     fi
 
     echo "Importing $gpg_pub_file_path..."
