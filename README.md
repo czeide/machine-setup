@@ -1,5 +1,7 @@
 # Czeide's machine setup
 
+[![Verify Checksum](https://github.com/czeide/machine-setup/actions/workflows/verify.yml/badge.svg)](https://github.com/czeide/machine-setup/actions/workflows/verify.yml)
+
 > Warning: Do not use this script unless you trust me or know how it works. Use at your own risk!
 
 This script installs the necessary tools that I usually use for my developer work.
