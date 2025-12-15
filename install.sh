@@ -87,26 +87,26 @@ x_install_neovim() {
 
     echo "Installing nvim..."
 
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-    sudo rm -rf /opt/nvim
-    tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-    rm nvim-linux-x86_64.tar.gz
+    curl -o /opt/nvim-linux-x86_64.tar.gz -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+    tar -C /opt -xzf /opt/nvim-linux-x86_64.tar.gz
+    rm /opt/nvim-linux-x86_64.tar.gz
 
     echo "Added nvim to /opt/nvim-linux-x86_64"
    
-    if [[ -n "$USER_HOME_DIR" ]]; then
+    if [[ -z "$USER_HOME_DIR" ]]; then
         echo "\$USER_HOME_DIR is missing..."
         exit 1
     fi
 
-    if [[ -n "$RC_FILE_NAME" ]]; then
+    if [[ -z "$RC_FILE_NAME" ]]; then
         echo "\$RC_FILE_NAME is missing..."
         exit 1
     fi
 
-    echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> $USER_HOME_DIR/$RC_FILE_NAME
-
-    echo "Added nvim to \$PATH in ${USER_HOME_DIR}/$RC_FILE_NAME"
+    if ! grep -Fq "/opt/nvim-linux-x86_64/bin" "$USER_HOME_DIR/$RC_FILE_NAME"; then
+        echo 'export PATH="$PATH:/opt/nvim-linux-x86_64/bin"' >> "$USER_HOME_DIR/$RC_FILE_NAME"
+        echo "Added nvim to \$PATH in ${USER_HOME_DIR}/$RC_FILE_NAME"
+    fi
 }
 
 x_setup_gpg_agent_config() {
