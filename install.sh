@@ -19,6 +19,40 @@ x_set_debian_user_home_dir() {
     fi 
 }
 
+x_setup_gitconfig() {
+    if [[ -z "$USER_HOME_DIR" ]]; then
+        echo "\$USER_HOME_DIR is missing..."
+        exit 1
+    fi
+
+    local gitconfig_path="$USER_HOME_DIR/.gitconfig"
+
+    if [[ -f "$gitconfig_path" ]]; then
+        echo "$gitconfig_path already exists. Skipping..."
+        return 0
+    fi
+
+    echo "Creating $gitconfig_path..."
+
+    cat <<EOF > "$gitconfig_path"
+[user]
+        name = Czeide Avanzado
+        email = 
+        signingkey = 
+[credential]
+        credentialStore = gpg
+        helper = /usr/local/bin/git-credential-manager
+[commit]
+        gpgsign = true
+[gpg]
+        program = /usr/bin/gpg
+EOF
+
+    if [[ -n "$SUDO_USER" ]]; then
+        chown "$SUDO_USER:$(id -gn "$SUDO_USER")" "$gitconfig_path"
+    fi
+}
+
 x_install_neovim() {
     if type "nvim" &> /dev/null; then
         echo "nvim already installed. Skipping..."
@@ -86,3 +120,4 @@ else
 fi
 
 x_install_neovim
+x_setup_gitconfig
