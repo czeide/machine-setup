@@ -9,6 +9,7 @@ x_install_debian_packages() {
         "htop"
         "curl"
         "git"
+        "gnupg"
     )
     PACKAGES_TO_INSTALL=()
 
