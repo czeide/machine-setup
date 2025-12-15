@@ -108,6 +108,53 @@ x_install_debian_packages() {
     sudo apt-get install -y "${PACKAGES_TO_INSTALL[@]}"
 }
 
+x_setup_gpg_agent_config() {
+    if [[ -z "$USER_HOME_DIR" ]]; then
+        echo "\$USER_HOME_DIR is missing..."
+        exit 1
+    fi
+
+    local gnupg_dir="$USER_HOME_DIR/.gnupg"
+    local gpg_agent_conf="$gnupg_dir/gpg-agent.conf"
+
+    if [[ ! -d "$gnupg_dir" ]]; then
+        echo "Creating $gnupg_dir..."
+        mkdir -p "$gnupg_dir"
+        chmod 700 "$gnupg_dir"
+        
+        if [[ -n "$SUDO_USER" ]]; then
+            chown "$SUDO_USER:$(id -gn "$SUDO_USER")" "$gnupg_dir"
+        fi
+    fi
+
+    if [[ -f "$gpg_agent_conf" ]]; then
+        echo "$gpg_agent_conf already exists. Skipping..."
+        return 0
+    fi
+
+    echo "Creating $gpg_agent_conf..."
+
+    if grep -qEi "(Microsoft|WSL)" /proc/version &> /dev/null; then
+        echo "WSL detected. Configuring for WSL..."
+        cat <<EOF > "$gpg_agent_conf"
+default-cache-ttl 28800
+max-cache-ttl 86400
+pinentry-program "/mnt/c/Program Files/Git/usr/bin/pinentry.exe"
+EOF
+    else
+        echo "Non-WSL environment detected (assuming Linux)..."
+        cat <<EOF > "$gpg_agent_conf"
+default-cache-ttl 28800
+max-cache-ttl 86400
+pinentry-program "/usr/bin/pinentry"
+EOF
+    fi
+
+    if [[ -n "$SUDO_USER" ]]; then
+        chown "$SUDO_USER:$(id -gn "$SUDO_USER")" "$gpg_agent_conf"
+    fi
+}
+
 if [[ "$(uname -s)" == "Darwin" ]]; then
     echo "Script not yet implemented for MacOS..."
     exit 1
@@ -121,3 +168,4 @@ fi
 
 x_install_neovim
 x_setup_gitconfig
+x_setup_gpg_agent_config
