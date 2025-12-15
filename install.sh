@@ -197,7 +197,10 @@ x_download_and_import_public_gpg() {
 
     if [[ -f "$gpg_pub_checksum_path" ]]; then
         echo "Verifying checksum..."
-        if ! (sha256sum --check --status "$gpg_pub_checksum_path"); then
+        EXPECTED_HASH=$(awk '{print $1}' "$gpg_pub_checksum_path")
+        ACTUAL_HASH=$(sha256sum "$gpg_pub_file_path" | cut -d ' ' -f 1)
+
+        if [[ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]]; then
             echo "Checksum verification failed for Public GPG key! Aborting..."
             rm "$gpg_pub_file_path" "$gpg_pub_checksum_path"
             exit 1
